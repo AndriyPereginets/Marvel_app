@@ -76,18 +76,20 @@ class CharList extends Component {
 
 
 
-        const charactersList = randomCharacters.map((char, index) => {
+        const charactersList = randomCharacters.map((char) => {
             let imgStyle = {objectFit: 'cover'};
             if (char.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
             imgStyle = {objectFit: 'contain'};
             }; 
 
             if (loading) {
-                return <li style={{backgroundColor: 'white', display: 'flex', alignItems: 'center'}} key={index} className="char__item">
+                return <li style={{backgroundColor: 'white', display: 'flex', alignItems: 'center'}} key={char.id} className="char__item">
                 {spiner}
             </li>
             } else {
-                return  <li key={index} className="char__item">
+                return  <li   className="char__item" 
+                            key={char.id}
+                            onClick={() => this.props.onCharSelected(char.id)}>
                             <img style={imgStyle} src={char.thumbnail} alt={char.name}/>
                             <div className="char__name">{char.name}</div>
                         </li>
