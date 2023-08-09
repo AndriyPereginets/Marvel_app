@@ -3,107 +3,107 @@ import MarvelService from '../../services/MarvelService';
 import Spiner from '../Spiner/Spiner';
 
 import './charList.scss';
+import ErrorMassage from '../errorMassage/ErrorMassage';
 
 class CharList extends Component {
-    state = {
-        randomCharacters: [],
-        loading: true, 
-        error: false,
-    }
 
+    state = {
+        charList: [],
+        loading: true,
+        error: false,
+        newItemLoading: false,
+        offset: 210,
+        charEnded: false
+    }
+    
     marvelService = new MarvelService();
 
-      onError = () => {
+    componentDidMount() {
+        this.onRequest();
+    }
+
+    onRequest = (offset) => {
+        this.onCharListLoading();
+        this.marvelService.getAllCharacters(offset)
+            .then(this.onCharListLoaded)
+            .catch(this.onError)
+    }
+
+    onCharListLoading = () => {
         this.setState({
+            newItemLoading: true
+        })
+    }
+
+    onCharListLoaded = (newCharList) => {
+        let ended = false;
+        if (newCharList.length < 9) {
+            ended = true;
+        }
+
+        this.setState(({offset, charList}) => ({
+            charList: [...charList, ...newCharList],
             loading: false,
-            error: true
-        })
+            newItemLoading: false,
+            offset: offset + 9,
+            charEnded: ended
+        }))
     }
 
-    onCharLoaded = () => {
+    onError = () => {
         this.setState({
+            error: true,
             loading: false
-        }) 
-    }
-
-    componentDidMount= () => {
-        this.updateCharsList();
-    }
-
-    componentWillUnmount() {
-        clearInterval(this.timerId);
-    }
-
-    generateRandomId = () => {
-        const min = 1011000;
-        const max = 1011400;
-        return Math.floor(Math.random() * (max - min + 1) + min);
-      };
-
-      getFullList = () => {
-        const numberOfCharacters = 9;
-        const charactersPromises = [];
-    
-        for (let i = 0; i < numberOfCharacters; i++) {
-          const id = this.generateRandomId();
-          const charPromise = this.marvelService.getCharacter(id);
-          charactersPromises.push(charPromise);
-        }
-    
-        return Promise.all(charactersPromises);
-      };
-
-
-    updateCharsList = () => {
-        this.setState({
-        loading: true, 
-        error: false})
-        this.getFullList()
-            .then((char) => {
-                this.setState({
-                randomCharacters: char,
-                loading: false
-                });
-            })
-            .then(this.onCharLoaded)
-            .catch(this.onError);
-        }
-
-    
-    render() {
-        const  {randomCharacters, loading} = this.state;
-        const spiner = loading ? <Spiner/> : null;
-
-
-
-        const charactersList = randomCharacters.map((char) => {
-            let imgStyle = {objectFit: 'cover'};
-            if (char.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
-            imgStyle = {objectFit: 'contain'};
-            }; 
-
-            if (loading) {
-                return <li style={{backgroundColor: 'white', display: 'flex', alignItems: 'center'}} key={char.id} className="char__item">
-                {spiner}
-            </li>
-            } else {
-                return  <li   className="char__item" 
-                            key={char.id}
-                            onClick={() => this.props.onCharSelected(char.id)}>
-                            <img style={imgStyle} src={char.thumbnail} alt={char.name}/>
-                            <div className="char__name">{char.name}</div>
-                        </li>
-            }
-
-           
         })
+    }
+
+    
+    renderItems(arr) {
+        const items =  arr.map((item) => {
+            let imgStyle = {'objectFit' : 'cover'};
+            if (item.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
+                imgStyle = {'objectFit' : 'unset'};
+            }
+            
+            return (
+                <li 
+                    className="char__item"
+                    key={item.id}
+                    onClick={() => this.props.onCharSelected(item.id)}>
+                        <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
+                        <div className="char__name">{item.name}</div>
+                </li>
+            )
+        });
+        // А эта конструкция вынесена для центровки спиннера/ошибки
+        return (
+            <ul className="char__grid">
+                {items}
+            </ul>
+        )
+    }
+
+    render() {
+
+        const {charList, loading, error, offset, newItemLoading, charEnded} = this.state;
+        
+        const items = this.renderItems(charList);
+
+        const errorMessage = error ? <ErrorMassage/> : null;
+        const spinner = loading ? <Spiner/> : null;
+        const content = !(loading || error) ? items : null;
+
         return (
             <div className="char__list">
-                <ul className="char__grid">
-                    {charactersList}
-                </ul>
-                <button className="button button__main button__long">
-                    <div className="inner" onClick={this.updateCharsList}>load more</div>
+                {errorMessage}
+                {spinner}
+                {content}
+                <button 
+                    className="button button__main button__long"
+                    disabled={newItemLoading}
+                    style={{'display': charEnded ? 'none' : 'block'}}
+                    onClick={() => this.onRequest(offset)}>
+                    <div className="inner">load more</div>
                 </button>
             </div>
         )
