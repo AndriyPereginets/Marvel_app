@@ -1,4 +1,5 @@
 import { Component } from 'react/cjs/react.production.min';
+import PropTypes from 'prop-types';
 import MarvelService from '../../services/MarvelService';
 import ErrorMassage from '../errorMassage/ErrorMassage';
 import Spiner from '../Spiner/Spiner';
@@ -27,9 +28,6 @@ class CharInfo extends Component {
         }
     }
 
-    componentDidCatch(err, info) {
-        this.setState({error: true})
-    }
 
     onCharLoaded = (char) => {
         this.setState({
@@ -120,6 +118,10 @@ const View = ({char}) => {
                 </ul>
         </>
     )
+}
+
+CharInfo.propTypes = {
+    charId: PropTypes.number
 }
 
 export default CharInfo;
