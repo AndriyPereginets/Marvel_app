@@ -64,20 +64,12 @@ class CharList extends Component {
     }
 
     focusOnItem = (id) => {
-        // Я реализовал вариант чуть сложнее, и с классом и с фокусом
-        // Но в теории можно оставить только фокус, и его в стилях использовать вместо класса
-        // На самом деле, решение с css-классом можно сделать, вынеся персонажа
-        // в отдельный компонент. Но кода будет больше, появится новое состояние
-        // и не факт, что мы выиграем по оптимизации за счет бОльшего кол-ва элементов
-
-        // По возможности, не злоупотребляйте рефами, только в крайних случаях
         this.itemRefs.forEach(item => item.classList.remove('char__item_selected'));
         this.itemRefs[id].classList.add('char__item_selected');
         this.itemRefs[id].focus();
     }
 
-    // Этот метод создан для оптимизации, 
-    // чтобы не помещать такую конструкцию в метод render
+    
     renderItems(arr) {
         const items =  arr.map((item, i) => {
             let imgStyle = {'objectFit' : 'cover'};
