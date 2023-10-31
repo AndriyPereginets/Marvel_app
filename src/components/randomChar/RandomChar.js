@@ -32,9 +32,6 @@ const RandomChar = () => {
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011100);
         getCharacter(id)
         .then(onCharLoaded)
-       /*  .catch((e) => {
-            setError(e.message);
-        }) */
     }
 
 
