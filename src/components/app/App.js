@@ -1,11 +1,15 @@
-import AppHeader from "../appHeader/AppHeader";
-import {MainPage, ComicsPage, Page404, SingleComicPage} from "../pages";
+import {lazy} from 'react';
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 
+import AppHeader from "../appHeader/AppHeader";
+import {MainPage, ComicsPage, Page404, SinglePage} from "../pages";
+
+const SingleComicLayout = lazy(() => import('../pages/SingleComicLayout/SingleComicLayout'));
+const SingleCharacterLayout = lazy(() => import('../pages/SingleCharacterLayout/SingleCharacterLayout'));
+
+
 const App = () =>  {
-
-
 
     return (
         <Router>
@@ -15,7 +19,8 @@ const App = () =>  {
                 <Routes>
                 <Route path="/" element={<MainPage/>}/>
                 <Route path="/comics" element={<ComicsPage/>}/>
-                <Route path="/comics/:comicId" element={<SingleComicPage/>}/>
+                <Route path="/comics/:id" element={<SinglePage Component={SingleComicLayout} dataType='comic'/>}/>
+                <Route path="/characters/:id" element={<SinglePage Component={SingleCharacterLayout} dataType='character'/>}/>
                 <Route path="/*" element={<Page404/>}/>
                 </Routes>
             </main>
