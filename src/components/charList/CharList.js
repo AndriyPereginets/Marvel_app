@@ -5,6 +5,25 @@ import PropTypes from 'prop-types';
 import './charList.scss';
 import ErrorMassage from '../errorMassage/ErrorMassage';
 
+const setContent = (proces, Component, newItemLoading) => {
+    switch (proces) {
+        case 'waiting':
+            return <Spiner/>;
+            break; 
+        case 'loading':
+            return newItemLoading ? <Component/> : <Spiner/>;
+            break;
+        case 'confirmed': 
+            return <Component/>;
+            break;
+        case 'error':
+            return <ErrorMassage/>;
+            break;
+        default:
+            throw new Error('Unexpected srate proces')
+    }
+}
+
 const CharList = (props) => {
 
     const [charList, setCharList] = useState([]);
@@ -12,7 +31,7 @@ const CharList = (props) => {
     const [offset, setOffset] = useState(210);
     const [charEnded, setCharEnded] = useState(false);
 
-    const {loading, error, getAllCharacters} = useMarvelService();
+    const {proces, setProces, getAllCharacters} = useMarvelService();
 
     useEffect( () => {
         onRequest(offset, true);
@@ -22,6 +41,7 @@ const CharList = (props) => {
         initial ? setNewItemLoading(false) : setNewItemLoading(true);
         getAllCharacters(offset)
             .then(onCharListLoaded)
+            .then(() => setProces('confirmed'))
     }
 
 
@@ -83,17 +103,9 @@ const CharList = (props) => {
         )
     }
 
-        
-        const items = renderItems(charList);
-
-        const errorMessage = error ? <ErrorMassage/> : null;
-        const spinner = loading && !newItemLoading ? <Spiner/> : null;
-
         return (
             <div className="char__list">
-                {errorMessage}
-                {spinner}
-                {items}
+                {setContent(proces, () => renderItems(charList), newItemLoading)}
                 <button 
                     className="button button__main button__long"
                     disabled={newItemLoading}
